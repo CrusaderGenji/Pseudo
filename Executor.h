@@ -13,7 +13,8 @@ struct MEMFRAG { //Memory Fragment - komórka pamiêci - dir przechowuje dane o fo
 	int val;
 };
 
-int *mem, memlen; //*mem - wskaŸnik do tablicy zawieraj¹cej dane zadeklarowane sekcj¹ danych, memsize - suma zarezerwowanych komórek pamiêci (wielkoœæ tablicy mem)
+struct MEMFRAG *mem;
+int memlen; //*mem - wskaŸnik do tablicy zawieraj¹cej dane zadeklarowane sekcj¹ danych, memsize - suma zarezerwowanych komórek pamiêci (wielkoœæ tablicy mem)
 int r[MEM_REG+1]; //rejestry
 int psr; //program state register - rejestr stanu programu
 //psr przyjmuje: 0 kiedy wynik operacji jest 0, 1 kiedy wynik jest pozytywny, 2 kiedy wynik jest negatywny, 3 w przypadku b³êdu

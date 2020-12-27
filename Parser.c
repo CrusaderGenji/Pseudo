@@ -177,6 +177,7 @@ void Parse_MC(int size) {
 	char temp_mc[STRING_SIZE];
 	char temp_nat_line[LINE_SIZE];
 
+	//dyrektywy
 	while (row[li].line[0] != '\n') {
 		row[li].type = 0;
 		row[li].order[0] = 'D';
@@ -193,36 +194,74 @@ void Parse_MC(int size) {
 			row[li].direct = 0;
 			row[li].number = 1;
 			//konwersja liczby zapisanej w kodzie maszynowym na liczbe typu int
-			temp_mc[0] = row[li].line[0];
-			temp_mc[1] = row[li].line[1];
-			temp_mc[2] = row[li].line[3];
-			temp_mc[3] = row[li].line[4];
-			temp_mc[4] = row[li].line[6];
-			temp_mc[5] = row[li].line[7];
-			temp_mc[6] = row[li].line[9];
-			temp_mc[7] = row[li].line[10];
+			i = 0, j = 0;
+			while (row[li].line[j] != '\n') {
+				if (row[li].line[j] != ' ') {
+					temp_mc[i] = row[li].line[j];
+					i++, j++;
+				}
+				else
+					j++;
+			}
 
 			printf("%10s, %8s\n", row[li].line, temp_mc);
 			row[li].val = strtol(temp_mc, NULL, 16);
 		}
 		li++;
+		strncpy(temp_mc, "", strlen(temp_mc));
 	}
 
+	//oznaczenie wiersza dziel¹cego sekcje
 	row[li].type = 2;
 	li++;
 
+	//rozkazy
 	while (li < size) {
 		row[li].type = 1;
-
+		i = 0;
 		char temp_ord[2];
-		temp_ord[0] = row[li].line[0];
-		temp_ord[1] = row[li].line[1];
+		temp_ord[0] = row[li].line[i];
+		while (row[li].line[i] == ' ' || row[li].line[i] == '\t') i++;
+		temp_ord[1] = row[li].line[i];
 		row[li].cmdcode = strtol(temp_ord, NULL, 16);
-		row[li].order[0] = temp_ord[0];
-		row[li].order[1] = temp_ord[1];
+		
+		//wpisanie w strukturê row[].order kodu rozkazu w kodzie naturalnym
+		RevCommandCode(temp_ord, row[li].order);
 
-		char 
+		//zczytanie numerów rejestrów których u¿ywa dany rozkaz
+		while (row[li].line[i]==' ' || row[li].line[i] == '\t') i++;
 
+		row[li].r1 = strtol(row[li].line[i], NULL, 16);
+
+		while (row[li].line[i] == ' ' || row[li].line[i] == '\t') i++;
+
+		row[li].r2 = strtol(row[li].line[i], NULL, 16);
+
+		//Jeœli rozkaz jest rozkazem d³ugim, przepisz przesuniêcie
+		if (IsNumber(row[li].line[0]) == 0) {
+
+			row[li].size = LONG_COMM;
+
+			while (row[li].line[i] == ' ' || row[li].line[i] == '\t') i++;
+
+			j = i;
+			i = 0;
+
+			while (row[li].line[j] != '\n') {
+				if (row[li].line[j] != ' ' || row[li].line[j] != '\t') {
+					temp_mc[i] = row[li].line[j];
+					i++, j++;
+				}
+				else
+					j++;
+			}
+
+			row[li].move = strtol(temp_mc, NULL, 16);
+			strncpy(temp_mc, "", strlen(temp_mc));
+		}
+		else
+			row[li].size = SHORT_COMM;
+		strncpy(temp_ord, "", strlen(temp_ord));
 	}
 
 }

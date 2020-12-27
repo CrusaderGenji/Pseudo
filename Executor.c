@@ -32,7 +32,7 @@ void Convert_Code(int size) {
 				value = row[it].val;
 
 				for (int ilosc = 0; ilosc < row[it].number; ilosc++) {
-					mem[memit] = value;
+					mem[memit].val = value;
 					memit++;
 				}
 				it++;
