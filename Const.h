@@ -14,6 +14,7 @@
 #define LINE_SIZE 128
 #define LABEL_SIZE 10
 #define STRING_SIZE 8
+#define ORDER_SIZE 2
 
 //Maksymalna iloœæ linii wejœcia
 #define MAX_LINE_AMOUNT 1000
