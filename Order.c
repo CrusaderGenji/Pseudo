@@ -1,4 +1,5 @@
 #include"Const.h"
+#include"Order.h"
 
 
 int CommandCode(const char* ord) {
@@ -43,78 +44,83 @@ int CommandCode(const char* ord) {
 	return 0;
 }
 
-void RevCommandCode(const char* ord, char* target) {
+void RevCommandCode(int ord, char* target) {
 
-	if (strcmp(ord, "10") == 0) {
+	printf("%0X\n", ord);
+
+	if (ord==0x10) {
 		strcpy(target, "AR");
 		return;
 	}
-	if (strcmp(ord, "D1") == 0) {
+	if (ord==0xD1) {
 		strcpy(target, "A");
 		return;
 	}
-	if (strcmp(ord, "12") == 0) {
+	if (ord==0x12) {
 		strcpy(target, "SR");
 		return;
 	}
-	if (strcmp(ord, "D3") == 0) {
+	if (ord==0xD3) {
 		strcpy(target, "S");
 		return;
 	}
-	if (strcmp(ord, "14") == 0) {
+	if (ord==0x14) {
 		strcpy(target, "MR");
 		return;
 	}
-	if (strcmp(ord, "D5") == 0) {
+	if (ord==0xD5) {
 		strcpy(target, "M");
 		return;
 	}
-	if (strcmp(ord, "16") == 0) {
+	if (ord==0x16) {
 		strcpy(target, "DR");
 		return;
 	}
-	if (strcmp(ord, "D7") == 0) {
+	if (ord==0xD7) {
 		strcpy(target, "D");
 		return;
 	}
-	if (strcmp(ord, "18") == 0) {
+	if (ord==0x18) {
 		strcpy(target, "CR");
 		return;
 	}
-	if (strcmp(ord, "D9") == 0) {
+	if (ord==0xD9) {
 		strcpy(target, "C");
 		return;
 	}
-	if (strcmp(ord, "E0") == 0) {
+	if (ord==0xE0) {
 		strcpy(target, "J");
 		return;
 	}
-	if (strcmp(ord, "E1") == 0) {
+	if (ord==0xE1) {
 		strcpy(target, "JZ");
 		return;
 	}
-	if (strcmp(ord, "E2") == 0) {
+	if (ord==0xE2) {
 		strcpy(target, "JP");
 		return;
 	}
-	if (strcmp(ord, "E3") == 0) {
+	if (ord==0xE3) {
 		strcpy(target, "JN");
 		return;
 	}
-	if (strcmp(ord, "F0") == 0) {
+	if (ord==0xF0) {
 		strcpy(target, "L");
 		return;
 	}
-	if (strcmp(ord, "31") == 0) {
+	if (ord==0x31) {
 		strcpy(target, "LR");
 		return;
 	}
-	if (strcmp(ord, "F2") == 0) {
+	if (ord==0xF2) {
 		strcpy(target, "LA");
 		return;
 	}
-	if (strcmp(ord, "F3") == 0) {
+	if (ord==0xF3) {
 		strcpy(target, "ST");
 		return;
 	}
+
+	perror("Command not found");
+	exit(EXIT_FAILURE);
 }

@@ -33,6 +33,11 @@ void Convert_Code(int size) {
 
 				for (int ilosc = 0; ilosc < row[it].number; ilosc++) {
 					mem[memit].val = value;
+					printf("%d %d\n", mem[memit].val, value);
+
+					if (row[it].direct == 1)
+						mem[memit].dir = 1;
+
 					memit++;
 				}
 				it++;
@@ -42,6 +47,10 @@ void Convert_Code(int size) {
 
 	it++;
 	mid = it;
+}
+
+void End() {
+	free(mem);
 }
 
 void Decode(int size) {
@@ -56,16 +65,19 @@ void Decode(int size) {
 
 		if (temp_cmd == 0x1 || temp_cmd == 0xD) {
 			//funkcje arytmetyczne
+			printf("ARITHETIC\n");
 			it = Ary(it);
 		}
 		else {
 			if (temp_cmd == 0xE) {
 				//skoki
+				printf("JUMP\n");
 				it = Jump(it);
 
 			}
 			else {
 				//zapisywanie wartoœci
+				printf("LOAD/STORE\n");
 				it = Load_Store(it);
 
 			}
@@ -104,7 +116,7 @@ int Ary(int rit) {
 	if (row[rit].order[1] == 'R')
 		tpos = r[row[rit].r2];
 	else
-		tpos = mem[CRA(row[rit].move, row[rit].r2)];
+		tpos = mem[CRA(row[rit].move, row[rit].r2)].val;
 
 	if (row[rit].r2 == COMM_REG) {
 		perror("Error - Pointed to value from the command register");
@@ -204,7 +216,7 @@ int Load_Store(int rit) {
 
 	//Load
 	if (ordnum == 0) {
-		r[reg1] = mem[sh];
+		r[reg1] = mem[sh].val;
 		printf("L\n");
 		return ++rit;
 	}
@@ -225,7 +237,8 @@ int Load_Store(int rit) {
 
 	//Store
 	if (ordnum == 3) {
-		mem[sh] = r[reg1];
+		mem[sh].val = r[reg1];
+		mem[sh].dir = 0;
 		printf("ST\n");
 		return ++rit;
 	}

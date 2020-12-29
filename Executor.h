@@ -21,9 +21,10 @@ int psr; //program state register - rejestr stanu programu
 int mid;
 
 void Convert_Code(int);
+void End();
 void Decode(int);
-int Ary(int);
 void Set_PSR(int);
 int CRA(int, int);
+int Ary(int);
 int Jump(int);
 int Load_Store(int);

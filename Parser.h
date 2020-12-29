@@ -23,6 +23,7 @@ struct LINE {
 	char label[LABEL_SIZE];
 	char line[LINE_SIZE];
 	char order[4];
+	int pos; //position - liczba w bajtach okreœlaj¹ca pozycjê rozkazu w pamiêci; liczone osobno dla sekcji rozkazów i sekcji danych
 
 	//if command
 	char arg1[LABEL_SIZE];
@@ -40,5 +41,7 @@ struct LINE {
 
 struct LINE row[MAX_LINE_AMOUNT];
 
-void Parse(int size);
-int IsNumber(char x);
+int IsNumber(char);
+int char2hex(char);
+void Parse(int);
+void Parse_MC(int);

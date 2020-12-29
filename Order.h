@@ -11,4 +11,4 @@
 #endif
 
 int CommandCode(const char* ord);
-void RevCommandCode(const char* ord, char* target);
+void RevCommandCode(int ord, char* target);

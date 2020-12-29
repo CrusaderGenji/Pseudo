@@ -7,6 +7,7 @@
 #include"Order.h"
 #include"Label_Offset.h"
 #include"Executor.h"
+#include"Visuals.h"
 
 #if defined( _WIN32 )
 #pragma warning(disable:4996)
@@ -14,70 +15,98 @@
 
 
 char path[PATH_SIZE];
+char code_type[LABEL_SIZE];
 char tout[LABEL_SIZE];
+int p_m = 0; //p_m = 0 - kod pseudoassemblera, p_m = 1 - kod maszynowy
 int k, k1;
 int file_length;
 FILE* fp;
 FILE* output_file;
 
 void Transfer(FILE* fp);
-void Write(int size);
+void Write(int size, int mark);
 
 int main(int argc, char** argv) {
 
 	//Wczytanie pliku
-	{
-		if (argc>1) {
-			fp = fopen(argv[1], "r");
+	k = 0;
+	//k = 0 - brak/b³¹d œcie¿ki
+	if (argc>1) {
+		fp = fopen(argv[1], "r");
 
-			if (fp == NULL)
-				printf("\nPath error.\n");
-			else
-				k++;
-		}
-
-		if(k == 0)
-		for (;;) {
-			printf("File path required. Please put in a correct path to the desired text file. . .\n");
-			scanf("%s", path);
-			fp = fopen(path, "r");
-
-			if (fp == NULL)
-				printf("\nPath error.\n");
-			else
-				if (path == "") {
-					perror("");
-					exit(EXIT_FAILURE);
-				}
-				else
-					break;		
-		}
+		if (fp == NULL)
+			printf("\nPath error.\n");
+		else
+			k++;
 	}
 
-	
+	for (;k==0;) {
+		printf("File path required. Please put in a correct path to the desired text file. . .\n");
+		scanf("%s %s", path, code_type);
+		fp = fopen(path, "r");
 
+		if (fp == NULL)
+			printf("\nPath error.\n");
+		else
+			if (path == "") {
+				perror("");
+				exit(EXIT_FAILURE);
+			}
+			else
+				k++;
+
+	}
+
+
+	if (argc > 2) {
+		if (strcmp(argv[2], "psa_code") == 0) p_m = 0;
+		if (strcmp(argv[2], "msck_code") == 0) p_m = 1;
+	}
+/*	else //brakuje czegoœ w stylu getline'a
+		for(;;) {
+
+			if (strcmp(code_type, "") != 0) {
+				if (strcmp(code_type, "psa_code") == 0) {
+					p_m = 0;
+					break;
+				}
+				else
+					if (strcmp(code_type, "msck_code") == 0) {
+						p_m = 1;
+						break;
+					}
+					else {
+						printf("Unknown type of code. Please enter the code type once again.\n");
+						scanf("%s", code_type);
+					}
+			}
+			else break;
+
+		}
+*/
 	Transfer(fp);
-
-	//printf("%d\n\r", file_length);
-
-	Parse(file_length);
-
-	Convert_arg2(file_length);
+	printf("%d\n", p_m);
+	if (p_m == 0) {
+		printf("Parsing pseudoassembler code\n");
+		Parse(file_length);
+		Convert_arg2(file_length);
+	}
+	else {
+		printf("Parsing machine code\n");
+		Parse_MC(file_length);
+	}
 
 	Convert_Code(file_length);
 
-	for(k=0; k<file_length; k++)
-		printf("%d | %10s | %2s | %5s | %5s| %d | %d | %d | %d | %2x || %d | %d | %d\n\r", row[k].type, row[k].label, row[k].order, row[k].arg1, row[k].arg2, row[k].r1, row[k].r2, row[k].move, row[k].size, row[k].cmdcode, row[k].direct, row[k].number, row[k].val);
-
-	//Print_Labels();
-
-	Write(file_length, 0);
+	//for(k=0; k<file_length; k++)
+	//	printf("%d | %10s | %2s | %d | %5s | %5s| %d | %d | %d | %d | %2x || %d | %d | %d\n\r", row[k].type, row[k].label, row[k].order, row[k].pos, row[k].arg1, row[k].arg2, row[k].r1, row[k].r2, row[k].move, row[k].size, row[k].cmdcode, row[k].direct, row[k].number, row[k].val);
 
 	Decode(file_length);
 
-	Write(file_length, 1);
+	Write(file_length, p_m);
 
 	fclose(fp);
+	End();
 
 	return 0;
 }
@@ -94,7 +123,7 @@ void Transfer(FILE* fp) { //przenosi ka¿d¹ liniê z pliku wejœciowego na miejsce 
 	file_length = k;
 }
 
-void Write(int size) {
+void Write(int size, int mark) {
 
 	//tworzenie pliku wyjœcia
 	output_file = fopen(OUTPUT_FILENAME, "w");
@@ -104,12 +133,27 @@ void Write(int size) {
 		exit(EXIT_FAILURE);
 	}
 
+	if (mark == 1)
+		fprintf(output_file, "Done using machine code\n");
+	else
+		fprintf(output_file, "Done using pseudoassembler code\n");
+
 	for (k = 0; k < memlen; k++) {
-		sprintf(tout, "%08X", mem[k]);
-		fprintf(output_file, "%c%c %c%c %c%c %c%c\n", tout[0], tout[1], tout[2], tout[3], tout[4], tout[5], tout[6], tout[7]);
+		printf("%d\n", mem[k].val);
+
+		if (mem[k].dir == 1) {
+			fprintf(output_file, "~~ ~~ ~~ ~~\n");
+		}
+		else {
+			sprintf(tout, "%08X", mem[k].val);
+			fprintf(output_file, "%c%c %c%c %c%c %c%c\n", tout[0], tout[1], tout[2], tout[3], tout[4], tout[5], tout[6], tout[7]);
+		}
 	}
 
-	for (k = 0; k < size; k++) {
+	k = 0;
+	while (row[k].type == 0) k++;
+
+	for (; k < size; k++) {
 
 		if (row[k].label[0] == '\n')
 			fprintf(output_file, "\n");
