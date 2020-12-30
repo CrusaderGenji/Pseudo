@@ -1,7 +1,8 @@
 #pragma once
 //Nazwa pliku wyjœciowego
 
-#define OUTPUT_FILENAME "output.txt"
+#define OUTPUT_FILENAME1 "output.txt"
+#define OUTPUT_FILENAME2 "result.txt"
 
 //Numery rejestrów
 
@@ -10,7 +11,7 @@
 
 //Maksymalne d³ugoœci ci¹gu znaków
 
-#define PATH_SIZE 128
+#define PATH_SIZE 256
 #define LINE_SIZE 128
 #define LABEL_SIZE 10
 #define STRING_SIZE 8

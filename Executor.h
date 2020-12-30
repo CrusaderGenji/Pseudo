@@ -20,11 +20,11 @@ int psr; //program state register - rejestr stanu programu
 //psr przyjmuje: 0 kiedy wynik operacji jest 0, 1 kiedy wynik jest pozytywny, 2 kiedy wynik jest negatywny, 3 w przypadku b³êdu
 int mid;
 
-void Convert_Code(int);
+void Init_Memory(int);
 void End();
 void Decode(int);
-int Ary(int);
 void Set_PSR(int);
 int CRA(int, int);
+int Ary(int);
 int Jump(int);
 int Load_Store(int);

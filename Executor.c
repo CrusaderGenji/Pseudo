@@ -1,6 +1,6 @@
 #include"Executor.h"
 
-void Convert_Code(int size) {
+void Init_Memory(int size) { //funkcja 
 
 	memlen = 0;
 	int it = 0;
@@ -53,7 +53,7 @@ void End() {
 	free(mem);
 }
 
-void Decode(int size) {
+void Decode(int size) { //funkcja wykonuj¹ca rozkazy pobrane z programu, zapisane w strukturze row[]
 
 	int it = mid;
 
@@ -238,6 +238,7 @@ int Load_Store(int rit) {
 	//Store
 	if (ordnum == 3) {
 		mem[sh].val = r[reg1];
+		mem[sh].dir = 0;
 		printf("ST\n");
 		return ++rit;
 	}

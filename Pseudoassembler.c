@@ -7,6 +7,9 @@
 #include"Order.h"
 #include"Label_Offset.h"
 #include"Executor.h"
+#include"Visuals.h"
+
+#include"curses.h"
 
 #if defined( _WIN32 )
 #pragma warning(disable:4996)
@@ -14,14 +17,16 @@
 
 
 char path[PATH_SIZE];
+char code_type[LABEL_SIZE];
 char tout[LABEL_SIZE];
+int p_m = 0; //p_m = 0 - kod pseudoassemblera, p_m = 1 - kod maszynowy
 int k, k1;
 int file_length;
 FILE* fp;
 FILE* output_file;
 
 void Transfer(FILE* fp);
-void Write(int size, int mark);
+void Write(int size, int ver, int mark);
 
 int main(int argc, char** argv) {
 
@@ -39,8 +44,8 @@ int main(int argc, char** argv) {
 
 	for (;k==0;) {
 		printf("File path required. Please put in a correct path to the desired text file. . .\n");
-		scanf("%s", path);
-			fp = fopen(path, "r");
+		scanf("%s %s", path, code_type);
+		fp = fopen(path, "r");
 
 		if (fp == NULL)
 			printf("\nPath error.\n");
@@ -51,14 +56,36 @@ int main(int argc, char** argv) {
 			}
 			else
 				k++;
+
 	}
 
-	int p_m = 0; //p_m = 0 - kod pseudoassemblera, p_m = 1 - kod maszynowy
+
 	if (argc > 2) {
 		if (strcmp(argv[2], "psa_code") == 0) p_m = 0;
 		if (strcmp(argv[2], "msck_code") == 0) p_m = 1;
 	}
-	
+/*	else //brakuje czegoœ w stylu getline'a (gets()?)
+		for(;;) {
+
+			if (strcmp(code_type, "") != 0) {
+				if (strcmp(code_type, "psa_code") == 0) {
+					p_m = 0;
+					break;
+				}
+				else
+					if (strcmp(code_type, "msck_code") == 0) {
+						p_m = 1;
+						break;
+					}
+					else {
+						printf("Unknown type of code. Please enter the code type once again.\n");
+						scanf("%s", code_type);
+					}
+			}
+			else break;
+
+		}
+*/
 	Transfer(fp);
 	printf("%d\n", p_m);
 	if (p_m == 0) {
@@ -71,14 +98,16 @@ int main(int argc, char** argv) {
 		Parse_MC(file_length);
 	}
 
-	Convert_Code(file_length);
+	Init_Memory(file_length);
+
+	Write(file_length, 0, p_m);
 
 	//for(k=0; k<file_length; k++)
 	//	printf("%d | %10s | %2s | %d | %5s | %5s| %d | %d | %d | %d | %2x || %d | %d | %d\n\r", row[k].type, row[k].label, row[k].order, row[k].pos, row[k].arg1, row[k].arg2, row[k].r1, row[k].r2, row[k].move, row[k].size, row[k].cmdcode, row[k].direct, row[k].number, row[k].val);
 
 	Decode(file_length);
 
-	Write(file_length, p_m);
+	Write(file_length, 1, p_m);
 
 	fclose(fp);
 	End();
@@ -98,10 +127,13 @@ void Transfer(FILE* fp) { //przenosi ka¿d¹ liniê z pliku wejœciowego na miejsce 
 	file_length = k;
 }
 
-void Write(int size, int mark) {
+void Write(int size, int ver, int mark) {
 
 	//tworzenie pliku wyjœcia
-	output_file = fopen(OUTPUT_FILENAME, "w");
+	if(ver==0)
+		output_file = fopen(OUTPUT_FILENAME1, "w");
+	else
+		output_file = fopen(OUTPUT_FILENAME2, "w");
 
 	if (output_file == NULL) {
 		perror("Could not create an output file");
@@ -109,14 +141,20 @@ void Write(int size, int mark) {
 	}
 
 	if (mark == 1)
-		printf(output_file, "Done using machine code\n");
+		fprintf(output_file, "Done using machine code\n");
 	else
-		printf(output_file, "Done using pseudoassembler code\n");
+		fprintf(output_file, "Done using pseudoassembler code\n");
 
 	for (k = 0; k < memlen; k++) {
 		printf("%d\n", mem[k].val);
-		sprintf(tout, "%08X", mem[k].val);
-		fprintf(output_file, "%c%c %c%c %c%c %c%c\n", tout[0], tout[1], tout[2], tout[3], tout[4], tout[5], tout[6], tout[7]);
+
+		if (mem[k].dir == 1) {
+			fprintf(output_file, "~~ ~~ ~~ ~~\n");
+		}
+		else {
+			sprintf(tout, "%08X", mem[k].val);
+			fprintf(output_file, "%c%c %c%c %c%c %c%c\n", tout[0], tout[1], tout[2], tout[3], tout[4], tout[5], tout[6], tout[7]);
+		}
 	}
 
 	k = 0;
