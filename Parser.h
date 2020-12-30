@@ -15,6 +15,7 @@ int i, j, li; //li - line iterator
 int sw; //indykator parsera wskazuj¹cy czy funkcja ma dzia³aæ wed³ug wskazañ dla linii dyrektywy, czy rozkazu
 //Wskazuje tak¿e na pust¹ liniê miêdzy sekcj¹ danych a sekcj¹ rozkazów
 char temp_line[LINE_SIZE]; //tymczasowe przechowywanie ³ancucha ca³ej linii
+int dss, css; //dss - data section size / wielkoœæ sekcji danych; css - command section size / wielkoœæ sekcji rozkazów
 
 
 struct LINE {

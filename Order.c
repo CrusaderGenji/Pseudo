@@ -46,8 +46,6 @@ int CommandCode(const char* ord) {
 
 void RevCommandCode(int ord, char* target) {
 
-	printf("%0X\n", ord);
-
 	if (ord==0x10) {
 		strcpy(target, "AR");
 		return;

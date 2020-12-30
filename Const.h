@@ -1,7 +1,8 @@
 #pragma once
 //Nazwa pliku wyjœciowego
 
-#define OUTPUT_FILENAME "output.txt"
+#define OUTPUT_FILENAME1 "output.txt"
+#define OUTPUT_FILENAME2 "result.txt"
 
 //Numery rejestrów
 
