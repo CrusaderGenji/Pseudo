@@ -6,11 +6,14 @@
 #include "Const.h"
 #include "Parser.h"
 #include "Label_Offset.h"
+#include "Visuals.h"
 
 struct MEMFRAG { //Memory Fragment - komórka pamiêci - dir przechowuje dane o formie zapisu 
 	//(jeœli dir = 0, jest tam zapisana liczba, natomiast jeœli dir =1, jest to miejsce zaalokowane przez DS bez przypisanej przez u¿ytkownika wartoœci) 
 	int dir;
 	int val;
+	int pos;
+	char label[LABEL_SIZE];
 };
 
 struct MEMFRAG *mem;
@@ -22,7 +25,8 @@ int mid;
 
 void Init_Memory(int);
 void End();
-void Decode(int);
+void Decode(int, int);
+//int DecodeVis(int);
 void Set_PSR(int);
 int CRA(int, int);
 int Ary(int);
