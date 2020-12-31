@@ -37,13 +37,13 @@ int Visualize(int step, int step2, int size) {
 	Code(step - dss - 1, step2, size);
 	PrintPSR(row[step2].pos);
 	if (row[step].order[1] == 'R' || row[step].order[0] == 'J') {
-		mhigh = 0;
 		mpos = 0;
+		mhigh = -1;
 		PrintMemory(mpos, mhigh);
 	}
 	else {
-		mhigh = 1;
 		mpos = row[step].move / 4;
+		mhigh = mpos;
 		PrintMemory(mpos, mhigh);
 	}
 	HighlightREG(step);
@@ -161,15 +161,15 @@ void PrintRegisters() {
 
 void PrintMemory(int frag, int act) {
 	
-	if (act == 1) {
-		if (frag < MEM_H / 2 || dss < (MEM_H)) {
-			for (i = 0, o = 0; i < min(MEM_H, dss); i++, o++) PrintMEMFrag(i, o);
-			HighlightMEM(frag);
+	if (act >=0) {
+		if (frag < MEM_H / 2 || memlen < (MEM_H)) {
+			for (i = 0, o = 0; i < min(MEM_H, memlen); i++, o++) PrintMEMFrag(i, o);
+			HighlightMEM(act);
 		}
 		else
-			if (dss - frag < MEM_H / 2) {
-				for (i = dss - (MEM_H)-dss, o = 0; i <= dss; i++, o++) PrintMEMFrag(i, o);
-				HighlightMEM(MEM_H + frag - dss);
+			if (memlen - frag < MEM_H / 2) {
+				for (i = memlen - (MEM_H), o = 0; i <= memlen; i++, o++) PrintMEMFrag(i, o);
+				HighlightMEM(MEM_H + act - memlen);
 			}
 			else {
 				for (i = frag - (MEM_H) / 2, o = 0; i <= frag + (MEM_H) / 2; i++, o++) PrintMEMFrag(i, o);
@@ -177,12 +177,12 @@ void PrintMemory(int frag, int act) {
 			}
 	}
 	else {
-		if (frag < MEM_H / 2 || dss < (MEM_H)) {
-			for (i = 0, o = 0; i < min(MEM_H, css); i++, o++) PrintMEMFrag(i, o);
+		if (frag < MEM_H / 2 || memlen < (MEM_H)) {
+			for (i = 0, o = 0; i < min(MEM_H, memlen); i++, o++) PrintMEMFrag(i, o);
 		}
 		else
-			if (dss - frag < MEM_H / 2) {
-				for (i = dss - (MEM_H)-dss, o = 0; i <= dss; i++, o++) PrintMEMFrag(i, o);
+			if (memlen - frag < MEM_H / 2) {
+				for (i = memlen - (MEM_H), o = 0; i <= memlen; i++, o++) PrintMEMFrag(i, o);
 			}
 			else {
 				for (i = frag - (MEM_H) / 2, o = 0; i <= frag + (MEM_H) / 2; i++, o++) PrintMEMFrag(i, o);
@@ -194,7 +194,7 @@ void PrintMemory(int frag, int act) {
 	return;
 }
 
-void PrintMEMFrag(int mi, int pl) {
+void PrintMEMFrag(int mi, int pl) {//wykorzystywane przez PrintMemory(), drukuje wskazan¹ przez "mi" liniê na miejscu "pl" w sekcji danych
 
 	char mchr[LABEL_SIZE];
 
@@ -215,8 +215,8 @@ void InitColors() {
 	start_color();
 	//init_pair(2, 123, 94);
 	//init_pair(3, 25, 173);
-	init_pair(2, COLOR_BLACK, 219);
-	init_pair(3, COLOR_BLACK, 119);
+	init_pair(3, COLOR_BLACK, 219);
+	init_pair(2, COLOR_BLACK, 119);
 	return;
 }
 
@@ -228,7 +228,7 @@ void InitVis() {
 	resize_term(ALL_H, ALL_W);
 	InitWindows();
 	InitColors();
-	keypad(mem_con, TRUE);
+	keypad(stdscr, TRUE);
 	wcolor_set(desc_con, COLOR_PAIR(2), NULL);
 	Refreshing();
 
@@ -284,7 +284,6 @@ void StaticElements() {
 	mvwprintw(desc_bor, 0, (DESC_W + 2 - strlen("INTERPRETER PSEUDOASSEMBLERA")) / 2, "INTERPRETER PSEUDOASSEMBLERA");
 	mvwprintw(desc_con, 0, 0, "Press X to advance a step\nPress Z to exit\n%d - dss\n%d - css", dss, css);
 	mvwprintw(sign_title, 0, (REG_W + 2 - strlen("Program state")) / 2, "Program state");
-	//mvwprintw(sign_con, 0, 0, "SIGN Content");
 	mvwprintw(reg_title, 0, (REG_W + 2 - strlen("Registers")) / 2, "Registers");
 	mvwprintw(mem_title, 0, (MEM_W + 2 - strlen("Data section")) / 2, "Data section");
 	return;
