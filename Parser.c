@@ -21,9 +21,10 @@ int char2hex(char x) {
 void Parse(int size) {
 
 	sw = 0;
+	css = 0; dss = 0;
 	int position = 0;
 
-	for (i = 0; i < size; i++) {
+	for (i = 0; i < size;i++) {
 		li = 0;
 
 		strncpy(temp_line, "", strlen(temp_line));
@@ -124,6 +125,7 @@ void Parse(int size) {
 			row[i].size = LONG_COMM * row[i].number;
 			row[i].pos = position;
 			position += row[i].size;
+			dss++;
 		}
 		else{//rozkaz
 
@@ -140,7 +142,7 @@ void Parse(int size) {
 			while (temp_line[li] == ' ' || temp_line[li] == '\t' && li < LINE_SIZE)
 				li++;
 
-			//zapis argumentów (adres zawsze zapisuje siê w arg2)
+			//zapis argumentów (adres jest zawsze zapisywany w arg2)
 			if (row[i].order[0] != 'J') {
 				j = 0;
 				while (temp_line[li] != ' ' && temp_line[li] != ',' && temp_line[li] != '\t' && li < LINE_SIZE) {
@@ -153,7 +155,7 @@ void Parse(int size) {
 			}
 
 			j = 0;
-			while (temp_line[li] != ' ' && temp_line[li] != '\n' && temp_line[li] != '\t' && temp_line[li] !='\\' && li < LINE_SIZE) {
+			while (temp_line[li] != ' ' && temp_line[li] != '\n' && temp_line[li] != '\t' && temp_line[li] !='/' && li < LINE_SIZE) {
 				row[i].arg2[j] = temp_line[li];
 				j++; li++;
 			}
@@ -166,6 +168,7 @@ void Parse(int size) {
 			if (row[i].order[1] == 'R')
 				row[i].r2 = atoi(row[i].arg2);
 
+			//printf("%s\n", row[i].order);
 
 			//konwersja ³añcucha rozkazu na odpowiadaj¹cy mu numer w systemie 16-tkowym
 			row[i].cmdcode = CommandCode(row[i].order);
@@ -183,15 +186,14 @@ void Parse(int size) {
 			//zapis pozycji rozkazu wzglêdem pocz¹tku sekcji rozkazów
 			row[i].pos = position;
 			position += row[i].size;
-
+			css++;
 		}
-
-
 	}
 }
 
 void Parse_MC(int size) {
 	li = 0;
+	dss = 0; css = 0;
 	char temp_mc[STRING_SIZE];
 	char temp_nat_line[LINE_SIZE];
 	int position = 0;
@@ -205,8 +207,8 @@ void Parse_MC(int size) {
 		row[li].type = 0;
 		row[li].order[0] = 'D';
 		row[li].size = LONG_COMM;
-		row[i].pos = position;
-		position += row[i].size;
+		row[li].pos = position;
+		position += row[li].size;
 
 		if (row[li].line[0] == '~') {
 
@@ -230,11 +232,12 @@ void Parse_MC(int size) {
 					j++;
 			}
 
-			printf("%10s, %s,  ", row[li].line, temp_mc);
+			//printf("%10s, %s,  ", row[li].line, temp_mc);
 			row[li].val = strtol(temp_mc, NULL, 16);
-			printf("%d\n", row[li].val);
+			//printf("%d\n", row[li].val);
 		}
 		li++;
+		dss++;
 		strncpy(temp_mc, "", STRING_SIZE);
 	}
 
@@ -257,11 +260,11 @@ void Parse_MC(int size) {
 		while (row[li].line[i] == ' ' || row[li].line[i] == '\t') i++;
 		temp_ord[1] = row[li].line[i];
 		row[li].cmdcode = strtol(temp_ord, NULL, 16);
-		printf("%0X  ", row[li].cmdcode);
+		//printf("%0X  ", row[li].cmdcode);
 		
 		//wpisanie w strukturê row[].order kodu rozkazu w kodzie naturalnym
 		RevCommandCode(row[li].cmdcode, row[li].order);
-		printf("%s\n", row[li].order);
+		//printf("%s\n", row[li].order);
 
 		i++;
 
@@ -270,7 +273,6 @@ void Parse_MC(int size) {
 
 		row[li].r1 = char2hex(row[li].line[i]);
 		i++;
-
 
 		while (row[li].line[i] == ' ' || row[li].line[i] == '\t') i++;
 
@@ -303,10 +305,10 @@ void Parse_MC(int size) {
 			row[li].size = SHORT_COMM;
 
 		//zapis pozycji rozkazu wzglêdem pocz¹tku sekcji rozkazów
-		row[i].pos = position;
-		position += row[i].size;
+		row[li].pos = position;
+		position += row[li].size;
 		strncpy(temp_ord, "", ORDER_SIZE);
+		css++;
 		li++;
 	}
-
 }
