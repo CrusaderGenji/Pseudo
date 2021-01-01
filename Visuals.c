@@ -32,9 +32,9 @@ WINDOW *sign_bor, *sign_con, *sign_title;
 WINDOW *mem_bor, *mem_con, *mem_title;
 
 int Visualize(int step, int step2, int size) {
-	int c, mpos, mhigh;
+	int c, mpos, mpos2, mhigh, mhigh2;
 	//step2--;
-	Code(step - dss - 1, step2, size);
+	Code(step - dss -1, step2, size);
 	PrintPSR(row[step2].pos);
 	if (row[step].order[1] == 'R' || row[step].order[0] == 'J') {
 		mpos = 0;
@@ -42,26 +42,37 @@ int Visualize(int step, int step2, int size) {
 		PrintMemory(mpos, mhigh);
 	}
 	else {
-		mpos = row[step].move / 4;
+		mpos = (row[step].move + r[row[step].r2])/ 4;
 		mhigh = mpos;
 		PrintMemory(mpos, mhigh);
 	}
+	mhigh2 = mhigh; mpos2 = mpos;
 	HighlightREG(step);
-	//werase(desc_con);
-	mvwprintw(desc_con, 4, 0, "          ", step);
-	mvwprintw(desc_con, 4, 0, "%3d - step", step);
 	Refreshing();
 	while (1) {
 		c = getch();
 		
-		if (c == (int)(KEY_SF) || c == (int)(KEY_DOWN) || c == (int)('n')) {
-			if(mpos + 1 < dss) mpos++;
-			PrintMemory(mpos, mhigh);
+		if (c == (int)(KEY_DOWN) || c == (int)('n')) {
+			if (mpos2 + 1 < memlen) {
+				mpos2++;
+				mhigh2++;
+			}
+			PrintMemory(mpos2, mhigh2);
+			wrefresh(mem_con);
 		}
 
-		if (c == (int)(KEY_SR) || c == (int)(KEY_UP) || c == (int)('m')) {
-			if (mpos -1 >= 0) mpos--;
+		if (c == (int)(KEY_UP) || c == (int)('m')) {
+			if (mpos2 - 1 >= 0) {
+				mpos2--;
+				mhigh2--;
+			}
+			PrintMemory(mpos2, mhigh2);
+			wrefresh(mem_con);
+		}
+
+		if (c == (int)('c')) {
 			PrintMemory(mpos, mhigh);
+			wrefresh(mem_con);
 		}
 
 		if (c == (int)('z') || c == (int)('Z')) return 0;
@@ -72,14 +83,23 @@ int Visualize(int step, int step2, int size) {
 }
 
 void HighlightStep(int step) {
-	mvwchgat(psa_con, step, 0, PSA_W, A_REVERSE, 0, NULL);
-	mvwchgat(msck_con, step, 0, MSCK_W, A_REVERSE, 0, NULL);
+	//kolory podœwietlonej linii kodu pseudoassemblera
+	mvwchgat(psa_con, step, 0, 14, COLOR_PAIR(5), 0, NULL);
+	mvwchgat(psa_con, step, 14, 3, COLOR_PAIR(2), 0, NULL);
+	mvwchgat(psa_con, step, 17, 1, COLOR_PAIR(5), 0, NULL);
+	mvwchgat(psa_con, step, 18, 11, COLOR_PAIR(3), 0, NULL);
+	//mvwchgat(psa_con, step, 28, 1, COLOR_PAIR(5), 0, NULL);
+	//kolory podœwietlonej linii kodu maszynowego
+	mvwchgat(msck_con, step, 0, 9, COLOR_PAIR(5), 0, NULL);
+	mvwchgat(msck_con, step, 9, 2, COLOR_PAIR(2), 0, NULL);
+	mvwchgat(msck_con, step, 11, 9, COLOR_PAIR(3), 0, NULL);
+	//mvwchgat(msck_con, step, 18, 1, COLOR_PAIR(5), 0, NULL);
 	return;
 }
 
 void HighlightREG(int step) {
-	mvwchgat(reg_con, row[step].r1, 0, REG_W, COLOR_PAIR(2), 0, NULL);
 	mvwchgat(reg_con, row[step].r2, 0, REG_W, COLOR_PAIR(3), 0, NULL);
+	mvwchgat(reg_con, row[step].r1, 0, REG_W, COLOR_PAIR(2), 0, NULL);
 	return;
 }
 
@@ -88,26 +108,33 @@ void HighlightMEM(int fr) {
 	return;
 }
 
+void MarkNextOrder(int nstep) {
+
+	mvwchgat(psa_con, nstep, 0, PSA_W, COLOR_PAIR(4), 0, NULL);
+	mvwchgat(msck_con, nstep, 0, MSCK_W, COLOR_PAIR(4), 0, NULL);
+	return;
+}
+
 void Code(int st, int mark, int size) {
-	//st -= 1;
+
 	int i, o;
 	werase(psa_con);
 	werase(msck_con);
-	//wrefresh(desc_con);
 
 	if (st < 14 || css < (COMM_LINES)) {
 		for (i = 0, o = 0; i < min(COMM_LINES, css); i++, o++) PrintCode(o, i);
 		HighlightStep(st);
 	}
 	else
-		if (css - st +1 < 14) {
-			for (i = size - COMM_LINES -1, o = 0; i < size; i++, o++) PrintCode(o, i);
-			HighlightStep(28+st-css - 1);
+		if (css - st + 1 < 14) {
+			for (i = css+1 - 28, o = 0; i < css+1; i++, o++) PrintCode(o, i);
+			HighlightStep(28 + st - css - 1);
 		}
 		else {
-			for (i = st - (COMM_LINES)/2, o = 0; i < st + (COMM_LINES)/2; i++, o++) PrintCode(o, i);
+			for (i = st - (COMM_LINES) / 2, o = 0; i < st + (COMM_LINES) / 2; i++, o++) PrintCode(o, i);
 			HighlightStep(14);
 		}
+
 	return;
 }
 
@@ -118,7 +145,7 @@ void PrintCode(int pi, int pmi) {
 
 	mvwprintw(psa_con, pi, LABEL_SIZE + 4, "%2d,", row[dss + 1 + pmi].r1);
 
-	if (strcmp(row[dss + 1 + pmi].arg1, "")!=0 && row[dss + 1 + pmi].order[1] != 'R')
+	if (strcmp(row[dss + 1 + pmi].arg1, "") != 0 && row[dss + 1 + pmi].order[1] != 'R')
 		mvwprintw(psa_con, pi, LABEL_SIZE + 8, "%s", row[dss + 1 + pmi].arg2);
 	else
 		mvwprintw(psa_con, pi, LABEL_SIZE + 8, "%d(%d)", row[dss + 1 + pmi].move, row[dss + 1 + pmi].r2);
@@ -140,7 +167,7 @@ void PrintPSR(int position) {
 	refresh(sign_con);
 	int psr2 = psr * 4;
 
-	mvwprintw(sign_con, 0, 0, "0000%02X00 0000%04X", psr2, position);
+	mvwprintw(sign_con, 0, 0, "0000%X000 0000%04X", psr2, position);
 
 	return;
 }
@@ -173,7 +200,7 @@ void PrintMemory(int frag, int act) {
 			}
 			else {
 				for (i = frag - (MEM_H) / 2, o = 0; i <= frag + (MEM_H) / 2; i++, o++) PrintMEMFrag(i, o);
-				HighlightMEM(MEM_H / 2);
+				HighlightMEM(MEM_H/2);
 			}
 	}
 	else {
@@ -189,8 +216,6 @@ void PrintMemory(int frag, int act) {
 			}
 	}
 	
-
-
 	return;
 }
 
@@ -213,10 +238,10 @@ void PrintMEMFrag(int mi, int pl) {//wykorzystywane przez PrintMemory(), drukuje
 
 void InitColors() {
 	start_color();
-	//init_pair(2, 123, 94);
-	//init_pair(3, 25, 173);
-	init_pair(3, COLOR_BLACK, 219);
-	init_pair(2, COLOR_BLACK, 119);
+	init_pair(3, 7, 88);
+	init_pair(2, 7, 22);
+	init_pair(4, 7, 236);
+	init_pair(5, 7, 239);
 	return;
 }
 
@@ -282,7 +307,7 @@ void StaticElements() {
 	mvwprintw(psa_title, 0, (PSA_W + 2 - strlen("Pseudoassembler code"))/2, "Pseudoassembler code");
 	mvwprintw(msck_title, 0, (MSCK_W + 2 - strlen("Machine code")) / 2, "Machine code");
 	mvwprintw(desc_bor, 0, (DESC_W + 2 - strlen("INTERPRETER PSEUDOASSEMBLERA")) / 2, "INTERPRETER PSEUDOASSEMBLERA");
-	mvwprintw(desc_con, 0, 0, "Press X to advance a step\nPress Z to exit\n%d - dss\n%d - css", dss, css);
+	mvwprintw(desc_con, 0, 0, "'X' to advance a step\n UP and DOWN arrow keys or 'n' and 'm'\n to navigate the Data Section\n'C' to view currently used data fragment\n'Z' to exit dss: %3d css: %3d", dss, css);
 	mvwprintw(sign_title, 0, (REG_W + 2 - strlen("Program state")) / 2, "Program state");
 	mvwprintw(reg_title, 0, (REG_W + 2 - strlen("Registers")) / 2, "Registers");
 	mvwprintw(mem_title, 0, (MEM_W + 2 - strlen("Data section")) / 2, "Data section");
@@ -309,13 +334,35 @@ void Refreshing() {
 
 void EndVis() {
 
-	int c1;
+	int c1, pos1, mh1;
+	pos1 = 0; mh1 = 0;
 	Refreshing();
-	werase(desc_con);
-	mvwprintw(desc_con, 1, 1, "Code finished\nPress Z to exit. . .");
+	wattrset(desc_con, COLOR_PAIR(3));
+	mvwprintw(desc_con, 0, 0, "                                               ");
+	mvwprintw(desc_con, 0, 0, " Code processing finished. Press Z to exit. . .");
+	wrefresh(desc_con);
 
 	while (1) {
-		c1 = getchar();
+		c1 = getch();
+
+		if (c1 == (int)(KEY_DOWN) || c1 == (int)('n')) {
+			if (pos1 + 1 < memlen) {
+				pos1++;
+				mh1++;
+			}
+			PrintMemory(pos1, mh1);
+			wrefresh(mem_con);
+		}
+
+		if (c1 == (int)(KEY_UP) || c1 == (int)('m')) {
+			if (pos1 - 1 >= 0) {
+				pos1--;
+				mh1--;
+			}
+			PrintMemory(pos1, mh1);
+			wrefresh(mem_con);
+		}
+
 		if (c1 == (int)('z') || c1 == (int)('Z')) break;
 	}
 

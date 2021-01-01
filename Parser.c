@@ -45,12 +45,18 @@ void Parse(int size) {
 
 		// etykieta, jeœli jest
 		if (temp_line[li] == ' ' || temp_line[li] == '\t')
-			while (temp_line[li] == ' ' || temp_line[li] == '\t' && li < LINE_SIZE)li++;
+			while ((temp_line[li] == ' ' || temp_line[li] == '\t') && li < LINE_SIZE)li++;
 		else
 			while (temp_line[li] != ' ' && temp_line[li] != '\t' && li < LINE_SIZE) {
 				row[i].label[li] = temp_line[li];
 				li++;
 			}
+
+		if (CommandCode(row[i].label) != 0) {
+			strcpy(row[i].label, "");
+			li = 0;
+		}
+		
 
 		if (strcmp(row[i].label, "")!=0)
 			Create_Label(row[i].label, i);
@@ -168,7 +174,6 @@ void Parse(int size) {
 			if (row[i].order[1] == 'R')
 				row[i].r2 = atoi(row[i].arg2);
 
-
 			//konwersja ³añcucha rozkazu na odpowiadaj¹cy mu numer w systemie 16-tkowym
 			row[i].cmdcode = CommandCode(row[i].order);
 			if (row[i].cmdcode == 0) {
@@ -231,9 +236,7 @@ void Parse_MC(int size) {
 					j++;
 			}
 
-			//printf("%10s, %s,  ", row[li].line, temp_mc);
 			row[li].val = strtol(temp_mc, NULL, 16);
-			//printf("%d\n", row[li].val);
 		}
 		li++;
 		dss++;
@@ -259,11 +262,9 @@ void Parse_MC(int size) {
 		while (row[li].line[i] == ' ' || row[li].line[i] == '\t') i++;
 		temp_ord[1] = row[li].line[i];
 		row[li].cmdcode = strtol(temp_ord, NULL, 16);
-		//printf("%0X  ", row[li].cmdcode);
 		
 		//wpisanie w strukturê row[].order kodu rozkazu w kodzie naturalnym
 		RevCommandCode(row[li].cmdcode, row[li].order);
-		//printf("%s\n", row[li].order);
 
 		i++;
 
